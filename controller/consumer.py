@@ -1,7 +1,7 @@
 from cgitb import lookup
 from random import randint
 from time import sleep
-# from .models import IotChannelData
+from .models import Gallery
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
@@ -61,4 +61,58 @@ class AIStatusConsumer(AsyncWebsocketConsumer):
     # Send message to WebSocket
         await self.send(text_data=json.dumps(event))
             
+
+
+
+class DetectPointConsumer(AsyncWebsocketConsumer):
+    
+    async def connect(self):
+        self.room_name = 'points'
+        self.room_group_name = 'chat_%s' % self.room_name
+
+        # Join room group
+        await self.channel_layer.group_add(
+            self.room_group_name,
+            self.channel_name
+        )
+
+        await self.accept()  
+
+    async def disconnect(self, close_code):
+        # Leave room group
+        await self.channel_layer.group_discard(
+            self.room_group_name,
+            self.channel_name
+        )
+
+    # Receive message from WebSocket
+    async def receive(self, text_data):
+        text_data_json = json.loads(text_data)
+        print(text_data_json)
+
+        my_array=text_data_json['value']
+        videoPath=text_data_json['videoPath']
+        dict_type={
+                    'type': 'AIControllerBroadCaste',
+                }
+        res = { **dict_type,**text_data_json,}
        
+        # try:
+        #      t = await database_sync_to_async(Gallery.objects.get)(videoPath=videoPath)
+        #      t.my_array = my_array 
+        #      await database_sync_to_async(t.save)()
+        # except:
+        #     await database_sync_to_async(Gallery.objects.create)(videoPath=videoPath,my_array=my_array)
+
+
+        # Send message to room group
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            res
+        )
+
+    # Receive message from room group
+    async def AIControllerBroadCaste(self, event):
+        print(event)
+    # Send message to WebSocket
+        await self.send(text_data=json.dumps(event))

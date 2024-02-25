@@ -3,4 +3,5 @@ from . import consumer
 
 websocket_urlpatterns = [
     re_path(r'AIController/$', consumer.AIStatusConsumer.as_asgi()),
+    re_path(r'DetectPoint/$', consumer.DetectPointConsumer.as_asgi()),
 ]

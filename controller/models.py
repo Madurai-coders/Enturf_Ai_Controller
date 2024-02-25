@@ -15,3 +15,11 @@ class AIStatus(models.Model):
 
     def __str__(self):
         return str(self.user)
+    
+
+class Gallery(models.Model):
+    videoPath = models.CharField(max_length=120)
+    my_array = models.CharField(max_length=50000)
+
+    def __str__(self):
+        return str(self.videoPath)
